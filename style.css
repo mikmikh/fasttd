@@ -1,0 +1,32 @@
+body {
+  background-color: darkgoldenrod;
+}
+.cell {
+  --bg-color: burlywood;
+  
+}
+
+.main > div {
+  margin: 0.25rem;
+  padding: 0.25rem;
+  border: 0.25rem dotted white;
+}
+
+.text-big {
+  font-size: 2rem;
+}
+.controls {
+  width: 60%;
+  justify-self: center;
+  user-select: none;
+  touch-action: manipulation;
+}
+.controls > div {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: bisque;
+  aspect-ratio: 1;
+  color: blueviolet;
+  font-weight: 800;
+}
