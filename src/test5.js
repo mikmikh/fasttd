@@ -35,7 +35,7 @@ function formatObj2(obj) {
 }
 
 const level_01 = {
-  size: [4, 5],
+  size: [4, 4],
   objects: [
     { pos: [1, 1], name: "castle" },
 
@@ -44,6 +44,9 @@ const level_01 = {
 
     { pos: [1, 0], name: "rock" },
     { pos: [2, 0], name: "tree" },
+
+    { pos: [0, 1], name: "rock" },
+    { pos: [0, 2], name: "rock" },
 
     { pos: [0, 0], name: "player" },
     { pos: [3, 3], name: "spawner" },
@@ -122,9 +125,7 @@ class RenderSystem {
 
       const textContent2 = obj ? formatObj2(obj) : "";
       const innerHTMLparts = [];
-      if (textContent2) {
-        innerHTMLparts.push(`<span class="emoji">${textContent2}</span>`);
-      }
+      
       if (textContent) {
         innerHTMLparts.push(`<div class="cell__info">${textContent}</div>`);
       }
@@ -132,8 +133,11 @@ class RenderSystem {
       if (dir2text[dkey]) {
         innerHTMLparts.push(`<div class="cell__debug">${dir2text[dkey]}</div>`);
       }
+      if (textContent2) {
+        innerHTMLparts.push(`<span class="emoji">${textContent2}</span>`);
+      }
       key2info3[key] = {
-        style,
+        style: { ...style, bgUrl: "url(assets/trace.png)" },
         innerHTML: innerHTMLparts.join(""),
       };
     });
@@ -200,10 +204,10 @@ class Game {
     });
 
     const button2key = {
-      "btn-up": 'w', // ^
-      "btn-right": 'd', // >
-      "btn-down": 's', // v
-      "btn-left": 'a', // <
+      "btn-up": "w", // ^
+      "btn-right": "d", // >
+      "btn-down": "s", // v
+      "btn-left": "a", // <
     };
     Object.entries(button2key).forEach(([cls, key]) => {
       document.querySelector(`.${cls}`).addEventListener("click", () => {
@@ -227,6 +231,9 @@ class Game {
     this.events.on("player_act", (offset) => this.handleMove(offset));
     this.events.on("step", () => this.handleStep());
     this.events.on("render", () => this.handleRender());
+    this.events.on("move_attack", (key, nkey) => {
+      
+    });
   }
   handleMove(offset) {
     // console.log("handleMove", offset);
@@ -320,7 +327,8 @@ class Game {
     }
 
     // attack
-    if (obj.name === "enemy" && !["enemy", "spawner"].includes(nobj.name)) {
+    if (obj.name !== "enemy" || !["enemy", "spawner"].includes(nobj.name)) {
+      this.events.emit('move_attack', key, nkey)
       nobj.hp ??= 0;
       nobj.hp -= 1;
       return false;

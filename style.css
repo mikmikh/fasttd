@@ -27,6 +27,13 @@ body {
   align-items: center;
   background-color: bisque;
   aspect-ratio: 1;
-  color: blueviolet;
+  color: rgb(172, 87, 251);
   font-weight: 800;
+
+  border-radius: 1rem;
+}
+
+.controls > div:active {
+  background-color: rgb(172, 87, 251);
+  color: bisque;
 }

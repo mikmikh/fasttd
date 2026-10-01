@@ -1,20 +1,29 @@
 export const NAME_TO_STYLE = {
   player: {
-    fgColor: "blue",
-    bgColor: "white",
+    fgColor: "cyan",
+    // bgColor: "white",
     // bgUrl: "url(assets/player-down.png)",
+  },
+  castle: {
+    fgColor: "gold",
   },
   enemy: {
     fgColor: "red",
-    bgColor: "white",
+  },
+  tree: {
+    fgColor: "lime",
+  },
+  wall: {
+    fgColor: "white",
   },
   bow: {
     fgColor: "orange",
-    bgColor: "white",
+  },
+  spawner: {
+    fgColor: "pink",
   },
   default: {
-    fgColor: "black",
-    bgColor: "white",
+    fgColor: "#bbb",
   },
 };
 export const NAME_TO_TEXT = {
