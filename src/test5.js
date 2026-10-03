@@ -6,6 +6,13 @@ import { JEvents } from "./utils/jevents.js";
 import { NAME_TO_STYLE, NAME_TO_TEXT } from "./core/constants.js";
 import { createFlowfield } from "./core/flowfield.js";
 
+function playAnimation(el, clsName = "jump-animation", duration = 200) {
+  el.classList.add(clsName);
+  setTimeout(() => {
+    el.classList.remove(clsName);
+  }, duration);
+}
+
 const offsets = [
   [-1, 0], // ^
   [0, 1], // >
@@ -13,26 +20,89 @@ const offsets = [
   [0, -1], // <
 ];
 
-function formatObj(obj) {
-  const parts = [`${NAME_TO_TEXT[obj.name]}`];
-  obj.hp && parts.push(`h${obj.hp}`);
-  obj.atk && parts.push(`a${obj.atk}`);
-  obj.tt !== undefined && parts.push(`tt${obj.tt}/${obj.ttl}`);
-  return parts.join(" ");
+// function formatObj(obj) {
+//   const parts = [`${NAME_TO_TEXT[obj.name]}`];
+//   obj.hp && parts.push(`h${obj.hp}`);
+//   obj.atk && parts.push(`a${obj.atk}`);
+//   obj.tt !== undefined && parts.push(`tt${obj.tt}/${obj.ttl}`);
+//   return parts.join(" ");
+// }
+// function formatObj2(obj) {
+//   const name2text = {
+//     player: "🧙‍♀️",
+//     castle: "👑",
+//     wall: "🛡️",
+//     enemy: "👻",
+//     spawner: "☠️",
+//     rock: "🪨",
+//     tree: "🌿",
+//     bow: "🏹",
+//   };
+//   return name2text[obj.name] ?? "?";
+// }
+const name2text = {
+  player: "🧙‍♀️",
+  castle: "👑",
+  wall: "🛡️",
+  enemy: "👻",
+  spawner: "☠️",
+  rock: "🪨",
+  tree: "🌿",
+  bow: "🏹",
+};
+const dir2text = {
+  "0_0": "x",
+  "-1_0": "^",
+  "0_1": ">",
+  "1_0": "v",
+  "0_-1": "<",
+};
+
+class CHBuilderHelper {
+  constructor() {
+    this.parts = [];
+  }
+  add(content, pos = "c") {
+    const pos2cls = {
+      c: "cell_center",
+      tl: "cell_corner cell_tl",
+      tr: "cell_corner cell_tr",
+      bl: "cell_corner cell_bl",
+      br: "cell_corner cell_br",
+    };
+    this.parts.push(`<div class="${pos2cls[pos]}">${content}</div>`);
+    return this;
+  }
+  str() {
+    return this.parts.join("");
+  }
 }
-function formatObj2(obj) {
-  const name2text = {
-    player: "🧙‍♀️",
-    castle: "👑",
-    wall: "🛡️",
-    enemy: "👻",
-    spawner: "☠️",
-    rock: "🪨",
-    tree: "🌿",
-    bow: "🏹",
-  };
-  return name2text[obj.name] ?? "?";
+class CHBuilder {
+  static start() {
+    return new CHBuilderHelper();
+  }
 }
+// function formatObjCorners(obj) {
+//   const parts = [];
+//   if (obj.hp !== undefined || NAME_TO_TEXT[obj.name]) {
+//     parts.push(
+//       `<div class="cell_corner cell_tl">💚${obj.hp ?? NAME_TO_TEXT[obj.name]}</div>`,
+//     );
+//   }
+//   if (obj.atk !== undefined) {
+//     parts.push(`<div class="cell_corner cell_tr">⚔️${obj.atk}</div>`);
+//   }s
+//   if (obj.tt !== undefined) {
+//     parts.push(`<div class="cell_corner cell_br">⭐${obj.tt}/${obj.ttl}</div>`);
+//   }
+//   // if (obj.dir !== undefined) {
+//   //   parts.push(`<div class="cell_corner cell_br">🧭${obj.tt}/${obj.ttl}</div>`);
+//   // }
+//   if (name2text[obj.name]) {
+//     parts.push(`<span class="cell_center">${name2text[obj.name]}</span>`);
+//   }
+//   return parts.join("");
+// }
 
 const level_01 = {
   size: [4, 4],
@@ -69,14 +139,14 @@ class RenderSystem {
   constructor(events) {
     this.events = events;
 
-    this.debugEl = document.getElementById("debug");
-    this.gameEl = document.getElementById("game");
+    // this.debugEl = document.getElementById("debug");
+    // this.gameEl = document.getElementById("game");
     this.game2El = document.getElementById("game2");
 
     this.size = null;
     // this.debugGrid = null;
     // this.gameGrid = null;
-    this.game2Grid = null;
+    this.grid = null;
 
     this.resize([1, 1]);
   }
@@ -84,14 +154,14 @@ class RenderSystem {
   dispose() {
     // this.debugGrid?.dispose();
     // this.gameGrid?.dispose();
-    this.game2Grid?.dispose();
+    this.grid?.dispose();
   }
   resize(size) {
     this.size = size;
     this.dispose();
     // this.debugGrid = new JGridView(this.debugEl, size);
     // this.gameGrid = new JGridView(this.gameEl, size);
-    this.game2Grid = new JGridView(this.game2El, size);
+    this.grid = new JGridView(this.game2El, size);
   }
   render({ key2obj, flowfield, size }) {
     const dir2text = {
@@ -116,35 +186,40 @@ class RenderSystem {
 
     Object.entries(flowfield).forEach(([key, dir]) => {
       const obj = key2obj[key];
-      const textContent = obj ? formatObj(obj) : "";
+      // const textContent = obj ? formatObj(obj) : "";
       const style = NAME_TO_STYLE[obj?.name] ?? NAME_TO_STYLE["default"];
-      key2info2[key] = {
-        style,
-        textContent,
-      };
+      // key2info2[key] = {
+      //   style,
+      //   textContent,
+      // };
 
-      const textContent2 = obj ? formatObj2(obj) : "";
-      const innerHTMLparts = [];
-      
-      if (textContent) {
-        innerHTMLparts.push(`<div class="cell__info">${textContent}</div>`);
+      // const textContent2 = obj ? formatObj2(obj) : "";
+      // const innerHTMLparts = [];
+
+      // if (obj) {
+      //   const cornerPart = formatObjCorners(obj);
+      //   innerHTMLparts.push(cornerPart);
+      // }
+
+      const cb = CHBuilder.start();
+      if (obj) {
+        cb.add(`💚${obj.hp ?? NAME_TO_TEXT[obj.name]}`, "tl");
+        obj.atk && cb.add(`⚔️${obj.atk}`, "tr");
+        obj.tt && cb.add(`⭐${obj.tt}/${obj.ttl}`, "br");
+        obj.atk && cb.add(`⚔️${obj.atk}`, "tr");
+        obj.atk && cb.add(`⚔️${obj.atk}`, "tr");
+        name2text[obj.name] && cb.add(name2text[obj.name], "c");
       }
       const dkey = jutils.jpos2key(dir);
-      if (dir2text[dkey]) {
-        innerHTMLparts.push(`<div class="cell__debug">${dir2text[dkey]}</div>`);
-      }
-      if (textContent2) {
-        innerHTMLparts.push(`<span class="emoji">${textContent2}</span>`);
-      }
+      dkey && cb.add(`${dir2text[dkey]}`, "bl");
+      const innerHTML = cb.str();
       key2info3[key] = {
         style: { ...style, bgUrl: "url(assets/trace.png)" },
-        innerHTML: innerHTMLparts.join(""),
+        innerHTML,
       };
     });
 
-    // this.debugGrid.renderGrid(key2info);
-    // this.gameGrid.renderGrid(key2info2);
-    this.game2Grid.renderGrid(key2info3);
+    this.grid.renderGrid(key2info3);
   }
 }
 
@@ -232,7 +307,11 @@ class Game {
     this.events.on("step", () => this.handleStep());
     this.events.on("render", () => this.handleRender());
     this.events.on("move_attack", (key, nkey) => {
-      
+      const cellEl = this.renderSystem.grid.getCellByKey(key);
+      cellEl && playAnimation(cellEl);
+
+      const ncellEl = this.renderSystem.grid.getCellByKey(nkey);
+      ncellEl && playAnimation(ncellEl);
     });
   }
   handleMove(offset) {
@@ -328,7 +407,7 @@ class Game {
 
     // attack
     if (obj.name !== "enemy" || !["enemy", "spawner"].includes(nobj.name)) {
-      this.events.emit('move_attack', key, nkey)
+      this.events.emit("move_attack", key, nkey);
       nobj.hp ??= 0;
       nobj.hp -= 1;
       return false;
@@ -441,6 +520,8 @@ class Game {
       return;
     }
 
+    const bkey = jutils.jpos2key(bow.pos);
+
     for (const off of offsets) {
       for (const range of [1, 2]) {
         const pos = jutils.addV(bow.pos, jutils.mulS(off, range));
@@ -449,6 +530,7 @@ class Game {
         if (obj?.name !== "enemy") {
           continue;
         }
+        this.events.emit("move_attack", bkey, key);
         obj.hp -= bow.atk;
         bow.tt = 0;
         return;

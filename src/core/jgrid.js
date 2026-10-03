@@ -51,7 +51,7 @@ export class JGridView {
   constructor(rootEl, size) {
     this.rootEl = rootEl;
     this.size = size;
-    
+
     this.gridEl = null;
     this.cellEls = null;
 
@@ -102,6 +102,15 @@ export class JGridView {
         }
       });
     });
+  }
+  getCellByKey(key) {
+    const { cellEls, size } = this;
+    const pos = jutils.jkey2pos(key);
+    const idx = jutils.pos2idx(pos, size);
+    if (idx < 0 || idx >= cellEls.length) {
+      return null;
+    }
+    return cellEls[idx];
   }
 }
 
